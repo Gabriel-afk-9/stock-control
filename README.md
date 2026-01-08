@@ -1,1 +1,1 @@
-# Stock-Control
+# stock-control
