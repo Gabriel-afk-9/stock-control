@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(REQUISITOR)
+  createdAt DateTime @default(now())
+}
+
+enum UserRole {
+  ALMOXARIFE
+  REQUISITOR
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  itemCode    String   @unique // O código "001", "002"
+  description String?
+  name        String
+  unit        String   // "CX", "UN"
+  quantity    Int      @default(0)
+  minStock    Int      @default(0)
+  maxStock    Int      @default(100)
+  category    String
+  updatedAt   DateTime @updatedAt
+}
