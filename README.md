@@ -1,6 +1,6 @@
 # Stock Control System
 
-Este projeto é um sistema de controle de estoque desenvolvido com **Next.js**, **TypeScript**, **TailwindCSS** e **Prisma ORM** utilizando **SQLite** como banco de dados. Ele oferece funcionalidades essenciais para o gerenciamento de almoxarifado, incluindo autenticação de usuários e controle detalhado de produtos.
+Este projeto é um sistema de controle de estoque desenvolvido com **Next.js**, **TypeScript**, **TailwindCSS** e **Prisma ORM** utilizando **SQLite**(PostgreSQL no futuro) como banco de dados. Ele oferece funcionalidades essenciais para o gerenciamento de almoxarifado, incluindo autenticação de usuários e controle detalhado de produtos.
 
 ## Funcionalidades
 
@@ -20,11 +20,11 @@ Este projeto é um sistema de controle de estoque desenvolvido com **Next.js**, 
 
 ## Tecnologias Utilizadas
 
-*   **Next.js:**
-*   **TypeScript:**
-*   **TailwindCSS:**
-*   **Prisma ORM:**
-*   **SQLite:**
+*   **Next.js**
+*   **TypeScript**
+*   **TailwindCSS**
+*   **Prisma ORM**
+*   **SQLite/PostgreSQL**
 
 ## Como Rodar o Projeto Localmente
 
