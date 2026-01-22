@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, Users, Home } from "lucide-react";
+import { Home, Package, Users, UserPlus, CalendarDays, Settings, CircleAlert } from "lucide-react";
 
 export function Sidebar() {
   return (
@@ -31,6 +31,38 @@ export function Sidebar() {
         >
           <Users size={20} />
           <span>Usuários</span>
+        </Link>
+
+        <Link 
+          href="/dashboard/monthly-requests" 
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white"
+        >
+          <CalendarDays size={20} />
+          <span>Solicitação Mensal</span>
+        </Link>
+
+        <Link 
+          href="/dashboard/request" 
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white"
+        >
+          <UserPlus size={20} />
+          <span>Requisição</span>
+        </Link>
+
+        <Link 
+          href="/dashboard/settings" 
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white"
+        >
+          <Settings size={20} />
+          <span>Configurações</span>
+        </Link>
+
+        <Link 
+          href="/dashboard/alerts" 
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-slate-300 hover:text-white"
+        >
+          <CircleAlert size={20} />
+          <span>Alertas</span>
         </Link>
       </nav>
       
