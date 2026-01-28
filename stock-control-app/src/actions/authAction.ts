@@ -1,59 +1,64 @@
 'use server'
 
 import { z } from 'zod'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '../lib/prisma'
 import { compare } from 'bcryptjs'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 
-const prisma = new PrismaClient()
-
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  password: z.string().min(1, "A senha é obrigatória"),
 })
 
 export async function loginAction(prevState: any, formData: FormData) {
-  const result = loginSchema.safeParse(Object.fromEntries(formData))
+  const data = Object.fromEntries(formData)
+  const result = loginSchema.safeParse(data)
 
   if (!result.success) {
-    return { error: "Dados inválidos. Verifique e tente novamente." }
+    return { error: result.error.issues[0].message }
   }
 
   const { email, password } = result.data
 
   try {
     const user = await prisma.user.findUnique({
-      where: { email },
-    })
+      where: { email } })
 
-    if (!user) {
-      return { error: "Credenciais inválidas." }
+    if (!user || !(await compare(password, user.password))) {
+      return { error: "E-mail ou senha incorretos" }
     }
-
-    const isPasswordValid = await compare(password, user.password)
-
-    if (!isPasswordValid) {
-      return { error: "Credenciais inválidas." }
-    }
-
-    (await cookies()).set('session_user', JSON.stringify({ id: user.id, role: user.role }), {
+    
+    const cookieStore = await cookies()
+    cookieStore.set('session_user', JSON.stringify({ 
+      id: user.id, 
+      role: user.role, 
+      name: user.name 
+    }), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24,
       path: '/',
+      sameSite: 'lax'
     })
 
-    if (user.role === 'ALMOXARIFE') {
-      redirect('/dashboard')
-    } else {
-      redirect('/dashboard/requisitions') 
-    }
+    const destination = user.role === 'ALMOXARIFE'
+    ? '/dashboard/inventory'
+    : '/dashboard/requisitions'
 
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-        throw error;
+    return redirect(destination)
+    
+  } catch (error: any) {
+    if (error?.digest?.includes('NEXT_REDIRECT')) {
+      throw error
     }
-    return { error: "Erro interno no servidor." }
+    
+    console.error("Erro no Login:", error)
+    return { error: "Ocorreu um erro inesperado. Tente novamente mais tarde." }
   }
+}
+//Usar no botão "Logout" no Sidebar
+export async function logoutAction() {
+  (await cookies()).delete('session_user')
+  redirect('/login')
 }
