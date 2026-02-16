@@ -80,28 +80,3 @@ Certifique-se de ter as seguintes ferramentas instaladas:
     ```
 
     Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver o resultado.
-
-## Estrutura do Projeto
-
-```
-stock-control/
-├── stock-control-app/
-│   ├── prisma/             # Esquemas e migrações do Prisma
-│   │   └── schema.prisma
-│   ├── public/             # Arquivos estáticos
-│   ├── src/                # Código fonte da aplicação
-│   │   ├── actions/        # Ações do servidor
-│   │   ├── app/            # Rotas e componentes da aplicação (Next.js App Router)
-│   │   │   ├── (auth)/login/ # Rotas de autenticação
-│   │   │   ├── (dashboard)/dashboard/ # Rotas do dashboard
-│   │   │   ├── lib/        # Funções utilitárias e bibliotecas
-│   │   │   ├── globals.css # Estilos globais
-│   │   │   ├── layout.tsx  # Layout principal da aplicação
-│   │   │   └── page.tsx    # Página inicial
-│   │   └── components/     # Componentes reutilizáveis
-│   ├── .gitignore
-│   ├── README.md
-│   ├── package.json
-│   └── tsconfig.json
-└── README.md
-```
