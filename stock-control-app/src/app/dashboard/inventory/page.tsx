@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, AlertCircleIcon } from "lucide-react";
+
+interface InventoryPageProps {
+  searchParams: Promise<{ [key:string]: string | string[] | undefined}>
+}
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 const prisma = globalForPrisma.prisma || new PrismaClient();
@@ -11,13 +15,33 @@ function getStockStatus(qty: number, min: number) {
   return { label: "Em estoque", color: "bg-green-100 text-green-700" };
 }
 
-export default async function InventoryPage() {
+export default async function InventoryPage(props: InventoryPageProps) {
+  const searchParams = await props.searchParams;
+  const hasError = searchParams.error === 'unauthorized';
+  
   const products = await prisma.product.findMany({
     orderBy: { itemCode: 'asc' }
   });
 
   return (
     <div className="space-y-6">
+      {hasError && (
+      <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm animate-pulse">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <AlertCircleIcon className="h-5 w-5 text-red-500" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700 font-bold">
+                Acesso Negado
+              </p>
+              <p className="text-sm text-red-600">
+                Você não tem permissão de Almoxarife para acessar a área de usuários.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Lista do inventário</h1>
