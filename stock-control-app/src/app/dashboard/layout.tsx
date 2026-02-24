@@ -1,4 +1,5 @@
 import { Sidebar } from "../../components/dashboard/Sidebar";
+import { UnauthorizedAlert } from "../../components/dashboard/UnauthorizedAlert";
 
 export default function DashboardLayout({
   children,
@@ -11,7 +12,8 @@ export default function DashboardLayout({
         <Sidebar />
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="flex-1 overflow-y-auto p-8 space-y-6">
+        <UnauthorizedAlert />
         {children}
       </main>
     </div>

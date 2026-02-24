@@ -44,7 +44,7 @@ export async function loginAction(prevState: any, formData: FormData) {
 
     const destination = user.role === 'ALMOXARIFE'
     ? '/dashboard/inventory'
-    : '/dashboard/requisitions'
+    : '/dashboard/request'
 
     return redirect(destination)
     
@@ -58,7 +58,7 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 }
 //Usar no botão "Logout" no Sidebar
-// export async function logoutAction() {
-//   (await cookies()).delete('session_user')
-//   redirect('/login')
-// }
+export async function logoutAction() {
+  (await cookies()).delete('session_user')
+  redirect('/login')
+}

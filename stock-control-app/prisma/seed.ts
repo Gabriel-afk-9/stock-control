@@ -17,16 +17,16 @@ async function main() {
     },
   })
 
-  // await prisma.user.upsert({
-  //   where: { email: 'func@estocai.com' },
-  //   update: {},
-  //   create: {
-  //     email: 'func@estocai.com',
-  //     name: 'Biel Funcionário',
-  //     password,
-  //     role: 'REQUISITOR',
-  //   },
-  // })
+  await prisma.user.upsert({
+    where: { email: 'func@estocai.com' },
+    update: {},
+    create: {
+      email: 'func@estocai.com',
+      name: 'Biel Funcionário',
+      password,
+      role: 'REQUISITOR',
+    },
+  })
 }
 
 main()
@@ -39,5 +39,7 @@ main()
     process.exit(1)
   })
 
-  // npx prisma db seed
+//npx prisma generate
+//npx prisma migrate dev
+// npx prisma db seed
 // npx prisma migrate reset
