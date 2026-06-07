@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useActionState } from "react";
-import { loginAction } from "../../../actions/authAction"; 
+import { loginAction } from "../../../../presentation/actions/authAction"; 
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {

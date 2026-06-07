@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Package, Users, UserPlus, CalendarDays, Settings, CircleAlert, LogOut } from "lucide-react";
-import { logoutAction } from "../../actions/authAction";
+import { logoutAction } from "../../../presentation/actions/authAction";
 
 export function Sidebar() {
   const pathname = usePathname();
