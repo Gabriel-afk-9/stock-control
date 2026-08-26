@@ -1,0 +1,311 @@
+## Objetivo
+
+Este projeto segue uma arquitetura baseada em Feature First, DDD e Clean Architecture.
+Este projeto obedece os princípios de Clean Code e SOLID.
+
+Toda alteração deve respeitar as regras definidas neste documento.
+
+---
+
+# Arquitetura
+
+## Princípios
+
+* Utilizar Feature First.
+* Utilizar Domain-Driven Design (DDD).
+* Utilizar Clean Architecture.
+* Priorizar alta coesão e baixo acoplamento.
+* Evitar lógica de negócio fora da camada de domínio ou aplicação.
+
+## Estrutura
+
+```text
+features/
+└── feature-name/
+    ├── domain/
+    ├── application/
+    ├── infrastructure/
+    ├── presentation/
+    └── main/
+        └── factories/
+```
+
+### Domain
+
+Responsável por:
+
+* Entidades
+* Value Objects
+* Serviços de Domínio
+* Eventos de Domínio
+* Contratos (Repositories, Gateways)
+
+Não pode depender de:
+
+* Frameworks
+* Banco de dados
+* Controllers
+* APIs externas
+
+### Application
+
+Responsável por:
+
+* Casos de uso
+* DTOs de entrada e saída
+* Orquestração de regras de negócio
+
+Não pode depender de:
+
+* Frameworks
+* Controllers
+* Infraestrutura
+
+Pode depender apenas do domínio.
+
+### Infrastructure
+
+Responsável por:
+
+* Persistência
+* APIs externas
+* Mensageria
+* Configurações de framework
+* Controllers 
+  * Validação de entrada
+  * Endpoints
+* Presentation
+  * Conversão HTTP ↔ Application
+
+Implementa contratos definidos pelo domínio.
+
+---
+
+# Convenções
+
+## Dependências
+
+Fluxo permitido:
+
+```text
+Infrastructure (Presentation)
+    ↓
+Application
+    ↓
+Domain
+
+Infrastructure → Domain
+```
+
+Fluxos proibidos:
+
+```text
+Domain → Infrastructure
+Domain → Application
+Application → Infrastructure
+```
+
+## Injeção de Dependências
+
+* Utilizar interfaces definidas no domínio.
+* Depender de abstrações e não de implementações.
+* Nunca instanciar dependências diretamente dentro dos casos de uso.
+* Utilizar factories em `main/factories/` para composição de dependências.
+
+---
+
+# Nomenclatura
+
+## Casos de Uso
+
+Todo caso de uso deve terminar com:
+
+```text
+UseCase
+```
+
+Exemplos (domínio do projeto):
+
+```text
+LoginUseCase
+ListProductsUseCase
+CreateProductUseCase
+UpdateProductUseCase
+DeleteProductUseCase
+```
+
+## Entradas
+
+Toda entrada de caso de uso deve terminar com:
+
+```text
+Input
+```
+
+Exemplos:
+
+```text
+LoginInput
+CreateProductInput
+UpdateProductInput
+DeleteProductInput
+```
+
+## Saídas
+
+Toda saída de caso de uso deve terminar com:
+
+```text
+Output
+```
+
+Exemplos:
+
+```text
+LoginOutput
+ListProductsOutput
+CreateProductOutput
+UpdateProductOutput
+DeleteProductOutput
+```
+
+## Repositórios
+
+* Devem ser interfaces.
+* Devem estar na camada Domain.
+
+Exemplos (projeto):
+
+```text
+IProductRepository
+IUserRepository
+ICryptoService
+```
+
+## Implementações de Repositório
+
+Devem ficar em Infrastructure.
+
+Exemplos (projeto - Prisma):
+
+```text
+PrismaProductRepository
+PrismaUserRepository
+BcryptCryptoService
+```
+
+---
+
+# Código
+
+## Regras Gerais
+
+* Preferir composição em vez de herança.
+* Evitar código duplicado.
+* Evitar métodos excessivamente longos.
+* Evitar classes com múltiplas responsabilidades.
+* Utilizar nomes explícitos e descritivos.
+* Não utilizar comentários para explicar código simples.
+* Código deve ser autoexplicativo.
+
+## Tratamento de Erros
+
+* Utilizar exceções específicas de domínio quando necessário.
+* Não lançar exceções genéricas.
+* Mensagens de erro devem ser claras.
+* Erros de domínio não devem vazar detalhes de infraestrutura (ex.: status HTTP).
+
+---
+
+# Testes
+
+## Obrigatórios
+
+Toda implementação deve possuir testes.
+
+### Domain
+
+* Testes unitários obrigatórios para entidades, value objects e serviços de domínio.
+
+### Application
+
+* Testes unitários obrigatórios para casos de uso.
+* Casos de uso devem possuir cobertura dos fluxos principais e de erro.
+
+### Infrastructure
+
+* Testar implementações críticas de repositório (com mock do Prisma Client).
+* Testes de Server Actions / controllers obrigatórios.
+* Testes de integração para fluxos críticos (login, CRUD de produtos).
+
+## Regras
+
+* Não remover testes existentes.
+* Atualizar testes quando regras de negócio forem alteradas.
+* Novas funcionalidades devem incluir testes correspondentes.
+* Utilizar Vitest + Testing Library (React) como stack padrão.
+
+---
+
+# Ao gerar código
+
+Sempre:
+
+1. Respeitar a estrutura Feature First.
+2. Respeitar DDD e Clean Architecture.
+3. Respeitar Clean Code e SOLID.
+4. Criar testes quando criar funcionalidades.
+5. Manter dependências apontando para dentro.
+6. Evitar lógica de negócio em Controllers / Server Actions.
+7. Evitar dependência de framework no Domain.
+8. Evitar dependência de framework no Application.
+9. Preferir soluções simples e legíveis.
+10. Não criar código morto ou não utilizado.
+11. Não modificar arquitetura sem solicitação explícita.
+12. Após finalizar tudo tente compilar o projeto.
+
+## Build e Testes
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+npm test
+```
+
+---
+
+# Segurança (Padrões Obrigatórios)
+
+## Sessão & Autenticação
+
+* Sessão **sempre** assinada com JWT HMAC (lib `jose`), cookie `httpOnly`, `secure`, `sameSite: 'lax'`.
+* Payload mínimo: `{ sub: userId, role: UserRole, exp }`.
+* Expiração curta (ex.: 15min access + 7d refresh) ou access-only 7d com rotação.
+* **Nunca** armazenar dados sensíveis no cookie sem assinatura (base64 puro é proibido).
+
+## Autorização (RBAC)
+
+* Guards server-side obrigatórios: `requireSession()` em todo layout protegido e `requireRole(...)` em Server Actions sensíveis.
+* Roles padronizadas no schema e no código: `'ADMIN' | 'ALMOXARIFE' | 'REQUISITOR'` (union type único).
+* Verificação de permissão **sempre** no servidor (Server Action / middleware), nunca apenas no cliente.
+
+## Validação de Entrada
+
+* **Zod** como única fonte de validação nas Server Actions (schema por action).
+* Schemas Zod definidos junto à action ou em `application/dtos/` — nunca confiar em dados crus do request.
+
+## Rate Limiting
+
+* Login e actions sensíveis devem ter rate limit (ex.: `upstash/ratelimit` ou in-memory com janela deslizante).
+
+---
+
+# Observabilidade & Qualidade
+
+* **Lint:** `eslint` (flat config) a cada PR / push.
+* **Type-check:** `tsc --noEmit` obrigatório no CI.
+* **Testes:** `vitest run` no CI com cobertura mínima 80% em domain/application.
+* **Logging:** `pino` estruturado (nível `info` em prod, `debug` em dev).
+* **Migrations:** `prisma migrate dev` versionadas em `prisma/migrations/` — proibido `db push` em branch compartilhada.
+* **Seed:** credenciais **apenas via `.env`**, nunca hardcoded.

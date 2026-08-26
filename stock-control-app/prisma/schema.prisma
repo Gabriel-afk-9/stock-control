@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String 
+  role      String   // Valores aceitos: 'ADMIN', 'MANAGER', 'EMPLOYEE'
+  createdAt DateTime @default(now())
+
+  @@map("users")
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  name      String
+  sku       String   @unique
+  quantity  Int
+  price     Decimal  // Utilizado como numérico no nosso ProductMapper
+  status    String   // Valores aceitos: 'IN_STOCK', 'OUT_OF_STOCK', 'LOW_STOCK'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("products")
+}

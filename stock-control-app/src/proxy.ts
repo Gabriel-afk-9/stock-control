@@ -1,21 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware } from './presentation/middlewares/authMiddleware';
-import { roleMiddleware } from './presentation/middlewares/roleMiddleware';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export function middleware(request: NextRequest) {
-  // 1. Executa validação básica de sessão
-  const authResponse = authMiddleware(request);
-  if (authResponse) return authResponse;
+export function proxy(request: NextRequest) {
+  const sessionCookie = request.cookies.get('stock_control_session');
+  const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard');
+  const isAuthRoute = request.nextUrl.pathname.startsWith('/login');
 
-  // 2. Executa validação de papéis (roles) para rotas específicas
-  const roleResponse = roleMiddleware(request);
-  if (roleResponse) return roleResponse;
+  if (isDashboardRoute && !sessionCookie) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
 
-  // 3. Se nenhuma regra bloqueou, permite a requisição seguir o fluxo normal
+  if (isAuthRoute && sessionCookie) {
+    return NextResponse.redirect(new URL('/dashboard/inventory', request.url));
+  }
+
   return NextResponse.next();
 }
 
-// Configuração padrão do Next.js para ignorar arquivos estáticos e de API
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/dashboard/:path*', '/login'],
 };
