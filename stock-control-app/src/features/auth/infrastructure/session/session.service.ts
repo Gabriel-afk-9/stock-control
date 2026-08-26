@@ -18,6 +18,22 @@ export class SessionService {
     });
   }
 
+  static async getSession(): Promise<AuthUserDTO | null> {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
+
+    if (!sessionCookie?.value) {
+      return null;
+    }
+
+    try {
+      const decodedSession = Buffer.from(sessionCookie.value, 'base64').toString('utf-8');
+      return JSON.parse(decodedSession) as AuthUserDTO;
+    } catch {
+      return null;
+    }
+  }
+
   static async destroySession(): Promise<void> {
     const cookieStore = await cookies();
     cookieStore.delete(SESSION_COOKIE_NAME);

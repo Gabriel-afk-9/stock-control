@@ -4,8 +4,19 @@ import { logoutAction } from "@/features/auth/presentation/actions/auth.actions"
 import { CalendarDays, CircleAlert, Home, LogOut, Package, Settings, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthUserDTO } from "@/features/auth/application/dtos/AuthUserDTO";
 
-export function Sidebar() {
+interface SidebarProps {
+  user: AuthUserDTO | null;
+}
+
+const roleLabels: Record<string, string> = {
+  ADMIN: 'Administrador',
+  ALMOXARIFE: 'Almoxarife',
+  REQUISITOR: 'Requisitor',
+};
+
+export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   
   const getLinkClasses = (path: string) => {
@@ -19,7 +30,7 @@ export function Sidebar() {
 
       return `${baseCLasses} ${isActivate ? activeClasses : inactiveClasses}`;
     };
-    
+     
     return (
       <div className="h-full bg-slate-900 text-white flex flex-col">
         <div className="p-6 border-b border-slate-800">
@@ -92,7 +103,9 @@ export function Sidebar() {
               <span>Sair</span>
             </button>
           </form>
-          <p className="text-xs text-slate-500">Logado como Almoxarife</p>
+          <p className="text-xs text-slate-500">
+            Logado como {user ? roleLabels[user.role] || user.role : 'Usuário'}
+          </p>
         </div>
       </div>
     );

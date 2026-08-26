@@ -4,26 +4,43 @@ import { hash } from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  const password = await hash('Chimbinha17', 10)
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+  const almoxarifePassword = process.env.ALMOXARIFE_PASSWORD || 'almoxarife123'
+  const requisitorPassword = process.env.REQUISITOR_PASSWORD || 'requisitor123'
+
+  const hashedAdminPassword = await hash(adminPassword, 12)
+  const hashedAlmoxarifePassword = await hash(almoxarifePassword, 12)
+  const hashedRequisitorPassword = await hash(requisitorPassword, 12)
 
   await prisma.user.upsert({
-    where: { email: 'Chimbinha1717@gmail.com' },
+    where: { email: 'admin@estocai.com' },
     update: {},
     create: {
-      email: 'Chimbinha1717@gmail.com',
-      name: 'Chimbinha',
-      password,
+      email: 'admin@estocai.com',
+      name: 'Administrador',
+      password: hashedAdminPassword,
+      role: 'ADMIN',
+    },
+  })
+
+  await prisma.user.upsert({
+    where: { email: 'almoxarife@estocai.com' },
+    update: {},
+    create: {
+      email: 'almoxarife@estocai.com',
+      name: 'Almoxarife',
+      password: hashedAlmoxarifePassword,
       role: 'ALMOXARIFE',
     },
   })
 
   await prisma.user.upsert({
-    where: { email: 'func@estocai.com' },
+    where: { email: 'requisitor@estocai.com' },
     update: {},
     create: {
-      email: 'func@estocai.com',
-      name: 'Biel Funcionário',
-      password,
+      email: 'requisitor@estocai.com',
+      name: 'Requisitor',
+      password: hashedRequisitorPassword,
       role: 'REQUISITOR',
     },
   })
@@ -38,8 +55,3 @@ main()
     await prisma.$disconnect()
     process.exit(1)
   })
-
-//npx prisma generate
-//npx prisma migrate dev
-// npx prisma db seed
-// npx prisma migrate reset
