@@ -1,82 +1,101 @@
-# Stock Control System
+# Estocaí — Controle de Estoque e Almoxarifado
 
-Este projeto é um sistema de controle de estoque desenvolvido com **Next.js**, **TypeScript**, **TailwindCSS** e **Prisma ORM** utilizando **SQLite**(PostgreSQL no futuro) como banco de dados. Ele oferece funcionalidades essenciais para o gerenciamento de almoxarifado, incluindo autenticação de usuários e controle detalhado de produtos.
+Sistema web de controle de estoque construído com **Next.js (App Router)**, **React**, **TypeScript**, **Prisma** e **SQLite** (dev) / **PostgreSQL** (produção), seguindo **Feature First + Clean Architecture + DDD**.
 
-## Funcionalidades
+## Stack
 
-*   **Autenticação de Usuários:** Sistema de login para acesso seguro.
-*   **Gerenciamento de Produtos:** Cadastro, visualização, edição e exclusão de produtos com os seguintes atributos:
-    *   `id`: Identificador único do produto.
-    *   `itemCode`: Código único do item (ex: "001", "002").
-    *   `description`: Descrição detalhada do produto (opcional).
-    *   `name`: Nome do produto.
-    *   `unit`: Unidade de medida (ex: "CX" para caixa, "UN" para unidade).
-    *   `quantity`: Quantidade atual em estoque.
-    *   `minStock`: Estoque mínimo para alerta.
-    *   `maxStock`: Estoque máximo.
-    *   `category`: Categoria do produto.
-    *   `updatedAt`: Data da última atualização.
-*   **Controle de Estoque:** Monitoramento de quantidades em estoque, com definição de limites mínimos e máximos.
+- Next.js 16 (App Router, Server Actions, Server Components)
+- React 19 / TypeScript 5
+- Prisma 6 + SQLite (dev) / PostgreSQL (prod)
+- Tailwind CSS 4 + shadcn/ui
+- Zod (validação), jose (JWT), bcryptjs (hash), pino (logs), Vitest (testes)
 
-## Tecnologias Utilizadas
+## Arquitetura
 
-*   **Next.js**
-*   **TypeScript**
-*   **TailwindCSS**
-*   **Prisma ORM**
-*   **SQLite/PostgreSQL**
+Organização por funcionalidade (`feature-first`) com camadas internas:
 
-## Como Rodar o Projeto Localmente
+```text
+src/
+├── app/                      # App Router (rotas, layouts, error/loading)
+├── features/
+│   ├── auth/                 # domain / application / infrastructure / presentation / main
+│   ├── inventory/
+│   └── users/
+├── shared/
+│   ├── kernel/               # User, UserRole, IUserRepository (contratos compartilhados)
+│   ├── lib/                  # logger (pino), rate-limit, errorHandler
+│   └── ui/                   # componentes de UI reutilizáveis (badge, button, table, ...)
+└── core/                     # errors (DomainError), prisma client
+```
 
-Para configurar e executar o projeto em sua máquina local, siga os passos abaixo:
+Regras (ver `AGENTT.txt`): dependência aponta para dentro (Infra → App → Domain); domínio não conhece frameworks; casos de uso terminam em `UseCase` com contratos `Input`/`Output`; repositórios são interfaces no domínio.
 
-### Pré-requisitos
+## Pré-requisitos e instalação
 
-Certifique-se de ter as seguintes ferramentas instaladas:
+```bash
+npm install
+cp .env.example .env        # ou ajuste DATABASE_URL e JWT_SECRET
+npx prisma migrate dev      # aplica migrations e gera o client
+npm run dev
+```
 
-*   Node.js (versão 18 ou superior)
-*   npm ou Yarn
-*   Git
+Variáveis de ambiente (`.env`):
 
-### Instalação
+```bash
+DATABASE_URL="file:./dev.db"          # dev (SQLite)
+JWT_SECRET="<secret com >= 32 caracteres>"   # obrigatório em produção
+LOG_LEVEL="debug"                     # opcional (info em produção)
+ADMIN_PASSWORD=...                    # usado pelo seed (opcional)
+```
 
-1.  **Clone o repositório:**
+## Scripts
 
-    ```bash
-    git clone https://github.com/Gabriel-afk-9/stock-control.git
-    cd stock-control/stock-control-app
-    ```
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Servidor de desenvolvimento |
+| `npm run build` | Build de produção (Next.js) |
+| `npm run lint` | ESLint (flat config) |
+| `npm run test` | Testes unitários (Vitest) |
+| `npm run test:coverage` | Testes + relatório de cobertura |
+| `npx tsc --noEmit` | Verificação de tipos |
+| `npx prisma migrate dev` | Criar/editar migrations (dev) |
+| `npx prisma db seed` | Popular dados iniciais |
 
-2.  **Instale as dependências:**
+## Modelo de dados
 
-    ```bash
-    npm install
-    # ou
-    yarn install
-    ```
+### User (`users`)
+- `id` (uuid), `name`, `email` (único), `password` (hash bcrypt), `role`, `createdAt`
+- **Roles:** `ADMIN` | `ALMOXARIFE` | `REQUISITOR` (union type único, ver `src/shared/kernel`)
 
-3.  **Configure o banco de dados:**
+### Product (`products`)
+- `id` (uuid), `name`, `sku` (único), `quantity`, `price` (Decimal), `minStock` (default 10), `maxStock?`, `createdAt`, `updatedAt`
+- **Status é derivado no domínio** (não persistido): calculado a partir de `quantity` vs `minStock`:
+  - `OUT_OF_STOCK` quando `quantity <= 0`
+  - `LOW_STOCK` quando `0 < quantity < minStock`
+  - `IN_STOCK` caso contrário
 
-    Crie um arquivo `.env` na raiz do diretório `stock-control-app` com a seguinte variável de ambiente:
+## Segurança
 
-    ```
-    DATABASE_URL="file:./dev.db"
-    ```
+- **Sessão JWT** assinada com HMAC (`jose`), cookie `httpOnly`/`secure`/`sameSite: lax`, payload `{ sub, role, name, email }`.
+- **Autorização (RBAC):** guards server-side `requireSession()` (layout do dashboard) e `requireRole(...)` (Server Actions sensíveis). Verificação sempre no servidor.
+- **Validação:** schemas **Zod** em toda Server Action (login, delete/create produto).
+- **Rate limit:** tentativas de login limitadas (in-memory, 5/min).
+- **Seed:** credenciais via `.env`, nunca hardcoded.
 
-    Em seguida, gere o cliente Prisma e execute as migrações:
+## Testes
 
-    ```bash
-    npx prisma generate
-    npx prisma migrate dev --name init
-    npx prisma db seed
-    ```
+- **Vitest** + Testing Library. Cobertura mínima de **80%** em `domain`/`application` (atualmente 100%).
+- Domain: `Product` (status), `InvalidCredentialsError`, `ProductNotFoundError`.
+- Application: `LoginUseCase`, `ListProductsUseCase`, `CreateProductUseCase`, `DeleteProductUseCase`.
+- Infra: `PrismaProductRepository`, `PrismaUserRepository` (Prisma mockado).
+- Server Actions: `loginAction`, `deleteProductAction`, `createProductAction` (mocks de `next/*`, guards e factories).
 
-4.  **Execute o servidor de desenvolvimento:**
+## CI
 
-    ```bash
-    npm run dev
-    # ou
-    yarn dev
-    ```
+GitHub Actions (`.github/workflows/ci.yml`): em push/PR roda `prisma migrate deploy` → `lint` → `tsc --noEmit` → `test` → `build`.
 
-    Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver o resultado.
+## Produção
+
+- Recomendado **PostgreSQL** para `Decimal` nativo (o SQLite armazena como float) e enums reais de role.
+- Defina `JWT_SECRET` forte (>= 32 caracteres) e `NODE_ENV=production` (ativa cookie `secure` e logs `info`).
+- Substitua o rate limit in-memory por solução distribuída (ex.: Upstash) em múltiplas instâncias.
