@@ -4,43 +4,50 @@ import { DomainError } from '@/core/errors/DomainError';
 import { redirect } from 'next/navigation';
 import { SessionService } from '../../infrastructure/session/session.service';
 import { makeLoginUseCase } from '../../main/factories/makeLoginUseCase';
+import { z } from 'zod';
+import { rateLimit } from '@/shared/lib/rate-limit';
 
-// 1. Criamos a tipagem estrita para o estado da Action
+const loginSchema = z.object({
+  email: z.string().email('E-mail inválido'),
+  password: z.string().min(1, 'Senha é obrigatória'),
+});
+
 export type AuthState = {
   success: boolean;
   error: string | null;
 } | null;
 
-// 2. Substituímos o 'any' por 'AuthState' e garantimos o retorno (Promise<AuthState>)
 export async function loginAction(prevState: AuthState, formData: FormData): Promise<AuthState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  if (!email || !password) {
-    return { success: false, error: 'E-mail e senha são obrigatórios.' };
+  const validation = loginSchema.safeParse({ email, password });
+  if (!validation.success) {
+    return { success: false, error: validation.error.issues[0].message };
+  }
+
+  const ip = 'unknown'; // Rate limit por IP seria ideal com headers
+  const { success: rateLimitOk } = await rateLimit.check(ip, 5, 60 * 1000); // 5 tentativas por minuto
+  if (!rateLimitOk) {
+    return { success: false, error: 'Muitas tentativas. Tente novamente em 1 minuto.' };
   }
 
   try {
     const loginUseCase = makeLoginUseCase();
-    const userDTO = await loginUseCase.execute(email, password);
+    const userDTO = await loginUseCase.execute(validation.data.email, validation.data.password);
     
-    // Cria a sessão com os dados seguros do usuário
     await SessionService.createSession(userDTO);
   } catch (error) {
     if (error instanceof DomainError) {
-     return { success: false, error: error instanceof Error ? error.message : 'Erro interno.' };
+      return { success: false, error: error.message };
     }
     return { success: false, error: 'Erro interno no servidor.' };
   }
 
-  // Redireciona APÓS o try-catch (regras do Next.js)
   redirect('/dashboard/inventory');
 }
 
 export async function logoutAction() {
-  // Destrói o cookie da sessão
   await SessionService.destroySession();
-  
-  // Redireciona o usuário para o login
   redirect('/login');
 }

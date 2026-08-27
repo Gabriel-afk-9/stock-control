@@ -6,6 +6,7 @@ import { Button } from '@/shared/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { Badge } from '@/shared/ui/badge'
 import { format } from 'date-fns'
+import { requireRole } from '@/features/auth/presentation/guards/auth.guards'
 import 'server-only'
 
 const prisma = new PrismaClient()
@@ -30,6 +31,7 @@ async function getUsers() {
 }
 
 export default async function UsersPage() {
+  await requireRole(['ADMIN']);
   const users = await getUsers()
 
   return (

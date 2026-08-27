@@ -1,13 +1,13 @@
 import { Sidebar } from "@/shared/ui/dashboard/Sidebar";
 import { UnauthorizedAlert } from "@/shared/ui/dashboard/UnauthorizedAlert";
-import { SessionService } from "@/features/auth/infrastructure/session/session.service";
+import { requireSession } from "@/features/auth/presentation/guards/auth.guards";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await SessionService.getSession();
+  const user = await requireSession();
 
   return (
     <div className="flex h-screen w-full bg-gray-100">
