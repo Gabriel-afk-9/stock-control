@@ -1,11 +1,12 @@
 'use server'
 
-import { DomainError } from '@/core/errors/DomainError';
 import { revalidatePath } from 'next/cache';
 import { makeDeleteProductUseCase } from '../../main/factories/makeDeleteProductUseCase';
 import { makeCreateProductUseCase } from '../../main/factories/makeCreateProductUseCase';
 import { z } from 'zod';
 import { requireRole } from '@/features/auth/presentation/guards/auth.guards';
+import { logger } from '@/shared/lib/logger';
+import { handleActionError } from '@/shared/lib/errorHandler';
 
 const deleteProductSchema = z.object({
   productId: z.string().uuid('ID do produto inválido'),
@@ -31,14 +32,12 @@ export async function deleteProductAction(productId: string) {
   try {
     const useCase = makeDeleteProductUseCase();
     await useCase.execute(validation.data);
-    
+
+    logger.info({ productId: validation.data.productId }, 'Produto excluído');
     revalidatePath('/dashboard/inventory');
     return { success: true };
   } catch (error) {
-    if (error instanceof DomainError) {
-      return { success: false, message: error.message };
-    }
-    return { success: false, message: 'Erro interno ao deletar produto.' };
+    return handleActionError(error, 'deleteProductAction');
   }
 }
 
@@ -62,15 +61,11 @@ export async function createProductAction(formData: FormData) {
   try {
     const useCase = makeCreateProductUseCase();
     await useCase.execute(validation.data);
+
+    logger.info({ sku: validation.data.sku }, 'Produto criado');
     revalidatePath('/dashboard/inventory');
     return { success: true };
   } catch (error) {
-    if (error instanceof DomainError) {
-      return { success: false, message: error.message };
-    }
-    if (error instanceof Error) {
-      return { success: false, message: error.message };
-    }
-    return { success: false, message: 'Erro interno ao criar produto.' };
+    return handleActionError(error, 'createProductAction');
   }
 }

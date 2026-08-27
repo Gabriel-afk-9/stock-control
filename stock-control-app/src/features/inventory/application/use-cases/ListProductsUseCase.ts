@@ -1,14 +1,19 @@
 import { IProductRepository } from '../../domain/repositories/IProductRepository';
 import { ProductMapper } from '../mappers/ProductMapper';
-import { ListProductsOutput } from '../dtos/ListProductsDTO';
+import { ListProductsInput, ListProductsOutput } from '../dtos/ListProductsDTO';
 
 export class ListProductsUseCase {
   constructor(private readonly productRepository: IProductRepository) {}
 
-  async execute(): Promise<ListProductsOutput> {
-    const products = await this.productRepository.findAll();
+  async execute(input: ListProductsInput): Promise<ListProductsOutput> {
+    const result = await this.productRepository.findPaginated(input);
+
     return {
-      products: ProductMapper.toDTOList(products),
+      products: ProductMapper.toDTOList(result.products),
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
+      totalPages: result.totalPages,
     };
   }
 }

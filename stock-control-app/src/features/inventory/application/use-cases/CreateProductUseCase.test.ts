@@ -8,6 +8,7 @@ function makeMocks() {
     findById: vi.fn(),
     findBySku: vi.fn(),
     findAll: vi.fn(),
+    findPaginated: vi.fn(),
     save: vi.fn(),
     delete: vi.fn(),
   };

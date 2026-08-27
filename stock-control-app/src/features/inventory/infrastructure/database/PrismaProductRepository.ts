@@ -1,5 +1,5 @@
 import { prisma } from '@/core/database/prisma.client';
-import { IProductRepository } from '../../domain/repositories/IProductRepository';
+import { IProductRepository, ProductQuery, ProductPaginationResult } from '../../domain/repositories/IProductRepository';
 import { Product } from '../../domain/entities/Product';
 
 export class PrismaProductRepository implements IProductRepository {
@@ -23,6 +23,39 @@ export class PrismaProductRepository implements IProductRepository {
     const products = await prisma.product.findMany();
 
     return products.map((p) => this.toDomain(p));
+  }
+
+  async findPaginated(query: ProductQuery): Promise<ProductPaginationResult> {
+    const page = Math.max(1, query.page ?? 1);
+    const pageSize = Math.max(1, Math.min(query.pageSize ?? 10, 100));
+    const search = query.search?.trim();
+
+    const where = search
+      ? { OR: [{ name: { contains: search } }, { sku: { contains: search } }] }
+      : {};
+
+    const [rows, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy: { name: 'asc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    let products = rows.map((p) => this.toDomain(p));
+
+    // Filtro de status é aplicado em memória porque o status é derivado no
+    // domínio (não persistido). Para grandes volumes, usar coluna computada no
+    // Postgres. Aqui filtramos apenas a fatia já paginada.
+    if (query.status) {
+      products = products.filter((p) => p.status === query.status);
+    }
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return { products, total, page, pageSize, totalPages };
   }
 
   async save(product: Product): Promise<void> {

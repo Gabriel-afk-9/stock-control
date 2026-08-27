@@ -4,6 +4,7 @@ const { mockProduct } = vi.hoisted(() => ({
   mockProduct: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
+    count: vi.fn(),
     upsert: vi.fn(),
     delete: vi.fn(),
   },
@@ -92,5 +93,39 @@ describe('PrismaProductRepository', () => {
     await repo.delete('p1');
 
     expect(mockProduct.delete).toHaveBeenCalledWith({ where: { id: 'p1' } });
+  });
+
+  it('findPaginated aplica where de busca, skip/take e count', async () => {
+    mockProduct.findMany.mockResolvedValue([
+      {
+        id: 'p1',
+        name: 'Parafuso',
+        sku: 'SKU-1',
+        quantity: 5,
+        price: { toString: () => '1.5' },
+        minStock: 10,
+        maxStock: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+    mockProduct.count.mockResolvedValue(21);
+
+    const repo = new PrismaProductRepository();
+    const result = await repo.findPaginated({ page: 2, pageSize: 10, search: 'par' });
+
+    expect(mockProduct.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { OR: [{ name: { contains: 'par' } }, { sku: { contains: 'par' } }] },
+        skip: 10,
+        take: 10,
+      })
+    );
+    expect(mockProduct.count).toHaveBeenCalledWith({
+      where: { OR: [{ name: { contains: 'par' } }, { sku: { contains: 'par' } }] },
+    });
+    expect(result.total).toBe(21);
+    expect(result.totalPages).toBe(3);
+    expect(result.products).toHaveLength(1);
   });
 });

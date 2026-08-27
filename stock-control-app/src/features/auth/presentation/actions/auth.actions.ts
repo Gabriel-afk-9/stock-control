@@ -7,6 +7,7 @@ import { SessionService } from '../../infrastructure/session/session.service';
 import { makeLoginUseCase } from '../../main/factories/makeLoginUseCase';
 import { z } from 'zod';
 import { rateLimit } from '@/shared/lib/rate-limit';
+import { logger } from '@/shared/lib/logger';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -37,14 +38,17 @@ export async function loginAction(prevState: AuthState, formData: FormData): Pro
     const loginUseCase = makeLoginUseCase();
     const result = await loginUseCase.execute(validation.data);
     
+    logger.info({ email: validation.data.email }, 'Login bem-sucedido');
     await SessionService.createSession(result.user);
   } catch (error) {
     if (error instanceof InvalidCredentialsError) {
+      logger.warn({ email: validation.data.email }, 'Login falhou: credenciais inválidas');
       return { success: false, error: error.message };
     }
     if (error instanceof DomainError) {
       return { success: false, error: error.message };
     }
+    logger.error({ email: validation.data.email, err: error }, 'Erro inesperado no login');
     return { success: false, error: 'Erro interno no servidor.' };
   }
 
