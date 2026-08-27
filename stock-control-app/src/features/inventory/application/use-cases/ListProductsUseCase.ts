@@ -1,12 +1,14 @@
 import { IProductRepository } from '../../domain/repositories/IProductRepository';
 import { ProductMapper } from '../mappers/ProductMapper';
-import { ProductDTO } from '../dtos/ProductDTO';
+import { ListProductsOutput } from '../dtos/ListProductsDTO';
 
 export class ListProductsUseCase {
   constructor(private readonly productRepository: IProductRepository) {}
 
-  async execute(): Promise<ProductDTO[]> {
+  async execute(): Promise<ListProductsOutput> {
     const products = await this.productRepository.findAll();
-    return ProductMapper.toDTOList(products);
+    return {
+      products: ProductMapper.toDTOList(products),
+    };
   }
 }

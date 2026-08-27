@@ -1,4 +1,4 @@
-import { UserRole } from '../../../users/domain/entities/User';
+import { UserRole } from '@/shared/kernel';
 
 export interface AuthUserDTO {
   id: string;

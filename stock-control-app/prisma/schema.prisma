@@ -11,8 +11,8 @@ model User {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
-  password  String 
-  role      String   // Valores aceitos: 'ADMIN', 'MANAGER', 'EMPLOYEE'
+  password  String
+  role      String   // Valores aceitos: 'ADMIN', 'ALMOXARIFE', 'REQUISITOR'
   createdAt DateTime @default(now())
 
   @@map("users")
@@ -23,8 +23,9 @@ model Product {
   name      String
   sku       String   @unique
   quantity  Int
-  price     Decimal  // Utilizado como numérico no nosso ProductMapper
-  status    String   // Valores aceitos: 'IN_STOCK', 'OUT_OF_STOCK', 'LOW_STOCK'
+  price     Decimal
+  minStock  Int      @default(10)
+  maxStock  Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

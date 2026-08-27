@@ -6,6 +6,8 @@ export interface ProductDTO {
   sku: string;
   quantity: number;
   price: number;
+  minStock: number;
+  maxStock?: number;
   status: ProductStatus;
   formattedPrice: string;
 }

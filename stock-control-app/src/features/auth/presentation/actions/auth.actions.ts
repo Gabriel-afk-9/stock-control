@@ -1,6 +1,7 @@
 'use server'
 
 import { DomainError } from '@/core/errors/DomainError';
+import { InvalidCredentialsError } from '../../domain/errors/InvalidCredentialsError';
 import { redirect } from 'next/navigation';
 import { SessionService } from '../../infrastructure/session/session.service';
 import { makeLoginUseCase } from '../../main/factories/makeLoginUseCase';
@@ -26,18 +27,21 @@ export async function loginAction(prevState: AuthState, formData: FormData): Pro
     return { success: false, error: validation.error.issues[0].message };
   }
 
-  const ip = 'unknown'; // Rate limit por IP seria ideal com headers
-  const { success: rateLimitOk } = await rateLimit.check(ip, 5, 60 * 1000); // 5 tentativas por minuto
+  const ip = 'unknown';
+  const { success: rateLimitOk } = await rateLimit.check(ip, 5, 60 * 1000);
   if (!rateLimitOk) {
     return { success: false, error: 'Muitas tentativas. Tente novamente em 1 minuto.' };
   }
 
   try {
     const loginUseCase = makeLoginUseCase();
-    const userDTO = await loginUseCase.execute(validation.data.email, validation.data.password);
+    const result = await loginUseCase.execute(validation.data);
     
-    await SessionService.createSession(userDTO);
+    await SessionService.createSession(result.user);
   } catch (error) {
+    if (error instanceof InvalidCredentialsError) {
+      return { success: false, error: error.message };
+    }
     if (error instanceof DomainError) {
       return { success: false, error: error.message };
     }

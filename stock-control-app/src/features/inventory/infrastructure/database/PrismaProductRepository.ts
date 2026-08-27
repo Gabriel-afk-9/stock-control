@@ -1,6 +1,6 @@
 import { prisma } from '@/core/database/prisma.client';
 import { IProductRepository } from '../../domain/repositories/IProductRepository';
-import { Product, ProductStatus } from '../../domain/entities/Product';
+import { Product } from '../../domain/entities/Product';
 
 export class PrismaProductRepository implements IProductRepository {
   async findById(id: string): Promise<Product | null> {
@@ -14,7 +14,8 @@ export class PrismaProductRepository implements IProductRepository {
       sku: data.sku,
       quantity: data.quantity,
       price: Number(data.price),
-      status: data.status as ProductStatus,
+      minStock: data.minStock,
+      maxStock: data.maxStock ?? undefined,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     });
@@ -29,7 +30,8 @@ export class PrismaProductRepository implements IProductRepository {
       sku: p.sku,
       quantity: p.quantity,
       price: Number(p.price),
-      status: p.status as ProductStatus,
+      minStock: p.minStock,
+      maxStock: p.maxStock ?? undefined,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
     }));
@@ -43,14 +45,16 @@ export class PrismaProductRepository implements IProductRepository {
         sku: product.sku,
         quantity: product.quantity,
         price: product.price,
-        status: product.status,
+        minStock: product.minStock,
+        maxStock: product.maxStock,
       },
       create: {
         name: product.name,
         sku: product.sku,
         quantity: product.quantity,
         price: product.price,
-        status: product.status,
+        minStock: product.minStock,
+        maxStock: product.maxStock,
       }
     });
   }

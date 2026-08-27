@@ -9,6 +9,8 @@ export class ProductMapper {
       sku: product.sku,
       quantity: product.quantity,
       price: product.price,
+      minStock: product.minStock,
+      maxStock: product.maxStock,
       status: product.status,
       formattedPrice: new Intl.NumberFormat('pt-BR', {
         style: 'currency',

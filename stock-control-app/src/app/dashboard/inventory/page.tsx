@@ -6,8 +6,8 @@ export default async function InventoryPage() {
   // 1. Instancia o caso de uso (A página não sabe o que é Prisma ou API)
   const listProductsUseCase = makeListProductsUseCase();
 
-  // 2. Executa a query diretamente (Retorna o ProductDTO[])
-  const productsDTO = await listProductsUseCase.execute();
+  // 2. Executa a query diretamente (Retorna o ListProductsOutput)
+  const { products: productsDTO } = await listProductsUseCase.execute();
 
   return (
     <main className="flex-1 space-y-4 p-8 pt-6">

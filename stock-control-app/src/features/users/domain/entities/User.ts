@@ -1,26 +1,2 @@
-export type UserRole = 'ADMIN' | 'ALMOXARIFE' | 'REQUISITOR';
-
-export interface UserProps {
-  id?: string;
-  name: string;
-  email: string;
-  passwordHash: string;
-  role: UserRole;
-  createdAt?: Date;
-}
-
-export class User {
-  public readonly id?: string;
-  public readonly name: string;
-  public readonly email: string;
-  public readonly passwordHash: string;
-  public readonly role: UserRole;
-
-  constructor(props: UserProps) {
-    this.id = props.id;
-    this.name = props.name;
-    this.email = props.email;
-    this.passwordHash = props.passwordHash;
-    this.role = props.role;
-  }
-}
+export { User } from '@/shared/kernel';
+export type { UserRole, UserProps, IUserRepository } from '@/shared/kernel';
