@@ -32,8 +32,8 @@ vi.mock('@/shared/lib/rate-limit', () => ({
   rateLimit: mocks.mockRateLimit,
 }));
 
-import { loginAction } from './auth.actions';
-import { InvalidCredentialsError } from '../../domain/errors/InvalidCredentialsError';
+import { loginAction } from '@/features/auth/presentation/actions/auth.actions';
+import { InvalidCredentialsError } from '@/features/auth/domain/errors/InvalidCredentialsError';
 
 function formData(email: string, password: string) {
   const fd = new FormData();

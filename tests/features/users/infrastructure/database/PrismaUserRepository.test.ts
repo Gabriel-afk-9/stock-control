@@ -11,7 +11,7 @@ vi.mock('@/core/database/prisma.client', () => ({
   prisma: { user: mockUser },
 }));
 
-import { PrismaUserRepository } from './PrismaUserRepository';
+import { PrismaUserRepository } from '@/features/users/infrastructure/database/PrismaUserRepository';
 import { User, UserRole } from '@/shared/kernel';
 
 describe('PrismaUserRepository', () => {

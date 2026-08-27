@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ListProductsUseCase } from './ListProductsUseCase';
-import { IProductRepository } from '../../domain/repositories/IProductRepository';
-import { Product } from '../../domain/entities/Product';
+import { ListProductsUseCase } from '@/features/inventory/application/use-cases/ListProductsUseCase';
+import { IProductRepository } from '@/features/inventory/domain/repositories/IProductRepository';
+import { Product } from '@/features/inventory/domain/entities/Product';
 
 function makeMocks() {
   const productRepository: IProductRepository = {

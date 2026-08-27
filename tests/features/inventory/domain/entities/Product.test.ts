@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Product } from './Product';
+import { Product } from '@/features/inventory/domain/entities/Product';
 
 function makeProduct(overrides: Partial<ConstructorParameters<typeof Product>[0]> = {}) {
   return new Product({
