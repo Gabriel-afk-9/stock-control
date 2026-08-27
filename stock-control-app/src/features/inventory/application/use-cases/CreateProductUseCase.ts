@@ -7,7 +7,7 @@ export class CreateProductUseCase {
   constructor(private readonly productRepository: IProductRepository) {}
 
   async execute(input: CreateProductInput): Promise<CreateProductOutput> {
-    const existingProduct = await this.productRepository.findById(input.sku);
+    const existingProduct = await this.productRepository.findBySku(input.sku);
 
     if (existingProduct) {
       throw new Error('Produto com este SKU já existe.');

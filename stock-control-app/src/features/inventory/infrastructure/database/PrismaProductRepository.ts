@@ -5,36 +5,24 @@ import { Product } from '../../domain/entities/Product';
 export class PrismaProductRepository implements IProductRepository {
   async findById(id: string): Promise<Product | null> {
     const data = await prisma.product.findUnique({ where: { id } });
-    
+
     if (!data) return null;
-    
-    return new Product({
-      id: data.id,
-      name: data.name,
-      sku: data.sku,
-      quantity: data.quantity,
-      price: Number(data.price),
-      minStock: data.minStock,
-      maxStock: data.maxStock ?? undefined,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-    });
+
+    return this.toDomain(data);
+  }
+
+  async findBySku(sku: string): Promise<Product | null> {
+    const data = await prisma.product.findUnique({ where: { sku } });
+
+    if (!data) return null;
+
+    return this.toDomain(data);
   }
 
   async findAll(): Promise<Product[]> {
     const products = await prisma.product.findMany();
-    
-    return products.map(p => new Product({
-      id: p.id,
-      name: p.name,
-      sku: p.sku,
-      quantity: p.quantity,
-      price: Number(p.price),
-      minStock: p.minStock,
-      maxStock: p.maxStock ?? undefined,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt,
-    }));
+
+    return products.map((p) => this.toDomain(p));
   }
 
   async save(product: Product): Promise<void> {
@@ -61,5 +49,29 @@ export class PrismaProductRepository implements IProductRepository {
 
   async delete(id: string): Promise<void> {
     await prisma.product.delete({ where: { id } });
+  }
+
+  private toDomain(data: {
+    id: string;
+    name: string;
+    sku: string;
+    quantity: number;
+    price: unknown;
+    minStock: number;
+    maxStock: number | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }): Product {
+    return new Product({
+      id: data.id,
+      name: data.name,
+      sku: data.sku,
+      quantity: data.quantity,
+      price: Number(data.price),
+      minStock: data.minStock,
+      maxStock: data.maxStock ?? undefined,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    });
   }
 }
