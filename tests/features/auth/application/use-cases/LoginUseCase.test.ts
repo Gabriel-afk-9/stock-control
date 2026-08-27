@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { LoginUseCase } from './LoginUseCase';
-import { InvalidCredentialsError } from '../../domain/errors/InvalidCredentialsError';
-import { IUserRepository } from '../../../users/domain/repositories/IUserRepository';
-import { ICryptoService } from '../../domain/services/ICryptoService';
+import { LoginUseCase } from '@/features/auth/application/use-cases/LoginUseCase';
+import { InvalidCredentialsError } from '@/features/auth/domain/errors/InvalidCredentialsError';
+import { IUserRepository } from '@/features/users/domain/repositories/IUserRepository';
+import { ICryptoService } from '@/features/auth/domain/services/ICryptoService';
 import { User, UserRole } from '@/shared/kernel';
 
 function makeUser(overrides: Partial<User> = {}): User {

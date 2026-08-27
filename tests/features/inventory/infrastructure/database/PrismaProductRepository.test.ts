@@ -14,8 +14,8 @@ vi.mock('@/core/database/prisma.client', () => ({
   prisma: { product: mockProduct },
 }));
 
-import { PrismaProductRepository } from './PrismaProductRepository';
-import { Product } from '../../domain/entities/Product';
+import { PrismaProductRepository } from '@/features/inventory/infrastructure/database/PrismaProductRepository';
+import { Product } from '@/features/inventory/domain/entities/Product';
 
 describe('PrismaProductRepository', () => {
   beforeEach(() => {

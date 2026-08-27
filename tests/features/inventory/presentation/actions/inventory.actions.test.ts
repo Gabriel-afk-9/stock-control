@@ -23,9 +23,9 @@ vi.mock('@/features/inventory/main/factories/makeCreateProductUseCase', () => ({
   makeCreateProductUseCase: () => mocks.mockCreateUseCase,
 }));
 
-import { deleteProductAction, createProductAction } from './inventory.actions';
+import { deleteProductAction, createProductAction } from '@/features/inventory/presentation/actions/inventory.actions';
 import { DomainError } from '@/core/errors/DomainError';
-import { ProductNotFoundError } from '../../domain/errors/ProductNotFoundError';
+import { ProductNotFoundError } from '@/features/inventory/domain/errors/ProductNotFoundError';
 
 describe('deleteProductAction', () => {
   beforeEach(() => {

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DeleteProductUseCase } from './DeleteProductUseCase';
-import { IProductRepository } from '../../domain/repositories/IProductRepository';
-import { ProductNotFoundError } from '../../domain/errors/ProductNotFoundError';
-import { Product } from '../../domain/entities/Product';
+import { DeleteProductUseCase } from '@/features/inventory/application/use-cases/DeleteProductUseCase';
+import { IProductRepository } from '@/features/inventory/domain/repositories/IProductRepository';
+import { ProductNotFoundError } from '@/features/inventory/domain/errors/ProductNotFoundError';
+import { Product } from '@/features/inventory/domain/entities/Product';
 
 function makeMocks() {
   const productRepository: IProductRepository = {

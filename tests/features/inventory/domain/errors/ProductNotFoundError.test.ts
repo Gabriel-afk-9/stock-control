@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ProductNotFoundError } from './ProductNotFoundError';
+import { ProductNotFoundError } from '@/features/inventory/domain/errors/ProductNotFoundError';
 
 describe('ProductNotFoundError', () => {
   it('é uma instância de Error', () => {
